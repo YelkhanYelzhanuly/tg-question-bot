@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: tg_postgres_container
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  bot:
+    image: python:3.11-slim
+    container_name: tg_bot_container
+    restart: always
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && python bot.py"
+    depends_on:
+      - db
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_HOST: db
+
+volumes:
+  postgres_data:
